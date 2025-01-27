@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard-server',
@@ -10,10 +10,12 @@ import { Component, OnInit, Input } from '@angular/core';
 export class DashboardServerComponent implements OnInit {
   currentStatus: 'online' | 'offline' | 'unknown' = 'offline';		
 
+private destroyref = inject(DestroyRef);
+
   constructor() {}
 
   ngOnInit(){
-      setInterval(() => {
+      const interval = setInterval(() => {
         const rnd = Math.random();
         if (rnd > 0.5) {
           this.currentStatus = 'online';
@@ -23,5 +25,12 @@ export class DashboardServerComponent implements OnInit {
           this.currentStatus = 'unknown';
         }
       }, 5000);
+      this.destroyref.onDestroy(() => {
+        clearInterval(interval);
+      });
     }
+    ngAfterViewInit() {
+      console.log('after view init'); 
+    }
+
   }

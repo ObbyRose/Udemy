@@ -1,5 +1,4 @@
 import { Component, input, output, signal } from '@angular/core';
-import { NewTicketComponent } from "../new-ticket/new-ticket.component";
 import { Ticket } from '../ticket.model';
 
 @Component({

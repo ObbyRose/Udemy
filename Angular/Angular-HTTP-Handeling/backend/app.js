@@ -37,29 +37,43 @@ app.get("/user-places", async (req, res) => {
 });
 
 app.put("/user-places", async (req, res) => {
-  const placeId = req.body.placeId;
+  try {
+    const { placeId } = req.body;
 
-  const fileContent = await fs.readFile("./data/places.json");
-  const placesData = JSON.parse(fileContent);
+    if (!placeId) {
+      return res.status(400).json({ message: "Invalid request: placeId is required" });
+    }
 
-  const place = placesData.find((place) => place.id === placeId);
+    const fileContent = await fs.readFile("./data/places.json");
+    const placesData = JSON.parse(fileContent);
 
-  const userPlacesFileContent = await fs.readFile("./data/user-places.json");
-  const userPlacesData = JSON.parse(userPlacesFileContent);
+    const place = placesData.find((p) => p.id === placeId);
 
-  let updatedUserPlaces = userPlacesData;
+    if (!place) {
+      return res.status(404).json({ message: `Place with ID ${placeId} not found` });
+    }
 
-  if (!userPlacesData.some((p) => p.id === place.id)) {
-    updatedUserPlaces = [...userPlacesData, place];
+    const userPlacesFileContent = await fs.readFile("./data/user-places.json");
+    let userPlacesData = JSON.parse(userPlacesFileContent);
+
+    if (!Array.isArray(userPlacesData)) {
+      userPlacesData = [];
+    }
+
+    if (!userPlacesData.some((p) => p?.id === place.id)) {
+      userPlacesData.push(place);
+    }
+
+    await fs.writeFile("./data/user-places.json", JSON.stringify(userPlacesData, null, 2));
+
+    res.status(200).json({ userPlaces: userPlacesData });
+  } catch (error) {
+    console.error("Error processing PUT request:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-
-  await fs.writeFile(
-    "./data/user-places.json",
-    JSON.stringify(updatedUserPlaces)
-  );
-
-  res.status(200).json({ userPlaces: updatedUserPlaces });
 });
+
+
 
 app.delete("/user-places/:id", async (req, res) => {
   const placeId = req.params.id;

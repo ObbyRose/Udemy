@@ -1,6 +1,13 @@
 import { Component, computed, inject, input, OnInit } from '@angular/core';
 import { UsersService } from '../users.service';
-import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
+import {
+  ActivatedRoute,
+  ActivatedRouteSnapshot,
+  ResolveFn,
+  RouterLink,
+  RouterOutlet,
+  RouterStateSnapshot,
+} from '@angular/router';
 
 @Component({
   selector: 'app-user-tasks',
@@ -9,21 +16,16 @@ import { ActivatedRoute, RouterLink, RouterOutlet } from '@angular/router';
   templateUrl: './user-tasks.component.html',
   styleUrl: './user-tasks.component.css',
 })
-export class UserTasksComponent implements OnInit {
-  userId = input.required<string>()
-  private usersService = inject(UsersService);
-  private activatedRoute = inject(ActivatedRoute);
-
-  userName: string | undefined;
-
-  ngOnInit(): void {
-    console.log(this.activatedRoute);
-    this.activatedRoute.paramMap.subscribe({
-      next: (paramMap) => {
-        this.userName = this.usersService.users.find(u => u.id === paramMap.get('userId'))?.name || '';
-      },
-    })
-    
-  }
-  
+export class UserTasksComponent {
+  userName = input.required<string>();
+  message = input.required<string>();
 }
+
+export const resolveUserName: ResolveFn <string> = (
+  activatedRoute: ActivatedRouteSnapshot, routerState: RouterStateSnapshot
+) => {
+  const usersService = inject(UsersService)
+  const userName = usersService.users.find((u) => u.id === activatedRoute.paramMap.get('userId'))
+  ?.name || '';
+  return userName;
+};

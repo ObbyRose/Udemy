@@ -169,4 +169,10 @@
     </button>
     <button type="submit" class="button">Sign up</button>
   </p>
+
+  @if (form.invalid && form.touched && form.dirty) {
+    <p class="control-error">
+      Invalid form - please fill out all fields correctly
+    </p>
+  }
 </form>
